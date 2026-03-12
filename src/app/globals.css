@@ -118,9 +118,9 @@ body::after {
 }
 
 .description {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.75);
   text-align: center;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   margin-bottom: 24px;
   letter-spacing: 1px;
 }
@@ -131,11 +131,11 @@ input[type="date"],
 textarea {
   background: rgba(0, 0, 0, 0.5);
   border: 1px solid var(--neon-cyan);
-  color: var(--neon-cyan);
-  padding: 10px 14px;
+  color: #fff;
+  padding: 12px 14px;
   border-radius: 4px;
   font-family: inherit;
-  font-size: 0.85rem;
+  font-size: 1rem;
   width: 100%;
   transition: box-shadow 0.2s;
 }
@@ -148,16 +148,17 @@ textarea:focus {
 }
 
 input[type="text"]::placeholder {
-  color: rgba(0, 255, 242, 0.35);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 label {
   display: block;
   color: var(--neon-pink);
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   letter-spacing: 3px;
   text-transform: uppercase;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  text-shadow: 0 0 8px rgba(255, 110, 199, 0.3);
 }
 
 /* Buttons */
@@ -196,10 +197,10 @@ label {
 /* Vote buttons */
 .vote-btn {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.5);
-  padding: 6px 10px;
-  font-size: 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 8px 12px;
+  font-size: 0.8rem;
   font-family: inherit;
   letter-spacing: 1px;
   cursor: pointer;
@@ -214,8 +215,8 @@ label {
 }
 
 .vote-btn.yes {
-  border-color: rgba(0, 255, 65, 0.4);
-  color: rgba(0, 255, 65, 0.6);
+  border-color: rgba(0, 255, 65, 0.5);
+  color: rgba(0, 255, 65, 0.8);
 }
 .vote-btn.yes.active {
   background: var(--vote-yes);
@@ -225,8 +226,8 @@ label {
 }
 
 .vote-btn.maybe {
-  border-color: rgba(255, 165, 0, 0.4);
-  color: rgba(255, 165, 0, 0.6);
+  border-color: rgba(255, 165, 0, 0.5);
+  color: rgba(255, 165, 0, 0.8);
 }
 .vote-btn.maybe.active {
   background: var(--vote-maybe);
@@ -236,8 +237,8 @@ label {
 }
 
 .vote-btn.no {
-  border-color: rgba(255, 0, 64, 0.4);
-  color: rgba(255, 0, 64, 0.6);
+  border-color: rgba(255, 0, 64, 0.5);
+  color: rgba(255, 0, 64, 0.8);
 }
 .vote-btn.no.active {
   background: var(--vote-no);
@@ -257,7 +258,7 @@ label {
 
 .date-card .date-label {
   color: var(--neon-cyan);
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   letter-spacing: 1px;
   margin-bottom: 10px;
   text-shadow: 0 0 8px rgba(0, 255, 242, 0.3);
@@ -294,9 +295,9 @@ label {
 
 .results-table th {
   color: var(--neon-pink);
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   letter-spacing: 1px;
-  padding: 10px 12px;
+  padding: 12px 12px;
   text-align: center;
   border-bottom: 1px solid rgba(123, 47, 190, 0.4);
   white-space: nowrap;
@@ -304,22 +305,22 @@ label {
 
 .results-table td {
   text-align: center;
-  padding: 8px 12px;
+  padding: 10px 12px;
   border-bottom: 1px solid rgba(123, 47, 190, 0.15);
-  font-size: 0.85rem;
+  font-size: 1rem;
   white-space: nowrap;
 }
 
 .results-table td:first-child {
   text-align: left;
   color: var(--neon-cyan);
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 .results-table .cell-yes { color: var(--vote-yes); }
 .results-table .cell-maybe { color: var(--vote-maybe); }
 .results-table .cell-no { color: var(--vote-no); }
-.results-table .cell-none { color: rgba(255, 255, 255, 0.2); }
+.results-table .cell-none { color: rgba(255, 255, 255, 0.3); }
 
 .summary-row {
   border-top: 2px solid var(--neon-pink) !important;
@@ -352,9 +353,9 @@ label {
   background: rgba(123, 47, 190, 0.3);
   border: 1px solid var(--neon-purple);
   border-radius: 16px;
-  padding: 4px 12px;
+  padding: 6px 14px;
   color: var(--neon-pink);
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   letter-spacing: 1px;
 }
 
@@ -457,8 +458,8 @@ label {
 }
 
 .response-count {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
   letter-spacing: 2px;
   margin-bottom: 12px;
 }
@@ -472,7 +473,7 @@ label {
 
 /* Calendar picker */
 .cal-picker {
-  max-width: 340px;
+  max-width: 380px;
 }
 
 .cal-header {
@@ -484,18 +485,19 @@ label {
 
 .cal-title {
   color: var(--neon-cyan);
-  font-size: 0.85rem;
+  font-size: 1rem;
   letter-spacing: 3px;
+  font-weight: bold;
   text-shadow: 0 0 8px rgba(0, 255, 242, 0.3);
 }
 
 .cal-nav {
   background: none;
-  border: 1px solid rgba(123, 47, 190, 0.4);
+  border: 1px solid rgba(123, 47, 190, 0.5);
   color: var(--neon-pink);
-  font-size: 1rem;
-  width: 32px;
-  height: 32px;
+  font-size: 1.1rem;
+  width: 36px;
+  height: 36px;
   border-radius: 4px;
   cursor: pointer;
   font-family: inherit;
@@ -510,11 +512,11 @@ label {
 .cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: 5px;
 }
 
 .cal-grid.cal-grid-wk {
-  grid-template-columns: 28px repeat(7, 1fr);
+  grid-template-columns: 32px repeat(7, 1fr);
 }
 
 .cal-wk-header,
@@ -522,26 +524,26 @@ label {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 0.2);
-  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.7rem;
   letter-spacing: 0;
 }
 
 .cal-day-header {
   text-align: center;
-  color: rgba(255, 255, 255, 0.35);
-  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.7rem;
   letter-spacing: 1px;
-  padding: 4px 0;
+  padding: 6px 0;
 }
 
 .cal-day {
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(123, 47, 190, 0.2);
-  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(123, 47, 190, 0.3);
+  color: rgba(255, 255, 255, 0.8);
   font-family: inherit;
-  font-size: 0.8rem;
-  padding: 8px 0;
+  font-size: 0.9rem;
+  padding: 10px 0;
   text-align: center;
   border-radius: 4px;
   cursor: pointer;
