@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatDate } from "@/lib/types";
+import { formatDate, getIsoWeek } from "@/lib/types";
 import type { PollConfig, Vote, VoteValue } from "@/lib/types";
 import { CalendarPicker } from "./CalendarPicker";
 
@@ -86,10 +86,11 @@ export function AdminPanel({ token }: { token: string }) {
     return { text: "\u2013", cls: "cell-none" };
   }
 
-  const yesCounts = dates.map(
-    (date) => votes.filter((v) => v.votes[date] === "yes").length
-  );
-  const maxYes = Math.max(...yesCounts, 0);
+  const weekGroups = dates.reduce<Record<number, string[]>>((groups, date) => {
+    const week = getIsoWeek(date);
+    (groups[week] ??= []).push(date);
+    return groups;
+  }, {});
 
   return (
     <div className="container">
@@ -174,48 +175,59 @@ export function AdminPanel({ token }: { token: string }) {
             No responses yet
           </p>
         ) : (
-          <div className="results-table-wrap">
-            <table className="results-table">
-              <thead>
-                <tr>
-                  <th style={{ textAlign: "left" }}>NAME</th>
-                  {dates.map((date) => (
-                    <th key={date}>{formatDate(date)}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {votes.map((vote) => (
-                  <tr key={vote.name}>
-                    <td>{vote.name}</td>
-                    {dates.map((date) => {
-                      const { text, cls } = cellIcon(vote.votes[date]);
-                      return (
-                        <td key={date} className={cls}>
-                          {text}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-                <tr className="summary-row">
-                  <td>TOTAL</td>
-                  {dates.map((date, i) => (
-                    <td
-                      key={date}
-                      className={
-                        maxYes > 0 && yesCounts[i] === maxYes
-                          ? "best-date"
-                          : ""
-                      }
-                    >
-                      {yesCounts[i]}
-                    </td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          Object.entries(weekGroups).map(([week, weekDates]) => {
+            const yesCounts = weekDates.map(
+              (date) => votes.filter((v) => v.votes[date] === "yes").length
+            );
+            const maxYes = Math.max(...yesCounts, 0);
+            return (
+              <div key={week} style={{ marginBottom: 20 }}>
+                <div className="week-label">W{week}</div>
+                <div className="results-table-wrap">
+                  <table className="results-table">
+                    <thead>
+                      <tr>
+                        <th style={{ textAlign: "left" }}>NAME</th>
+                        {weekDates.map((date) => (
+                          <th key={date}>{formatDate(date)}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {votes.map((vote) => (
+                        <tr key={vote.name}>
+                          <td>{vote.name}</td>
+                          {weekDates.map((date) => {
+                            const { text, cls } = cellIcon(vote.votes[date]);
+                            return (
+                              <td key={date} className={cls}>
+                                {text}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                      <tr className="summary-row">
+                        <td>TOTAL</td>
+                        {weekDates.map((date, i) => (
+                          <td
+                            key={date}
+                            className={
+                              maxYes > 0 && yesCounts[i] === maxYes
+                                ? "best-date"
+                                : ""
+                            }
+                          >
+                            {yesCounts[i]}
+                          </td>
+                        ))}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })
         )}
       </div>
     </div>
