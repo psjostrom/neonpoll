@@ -13,6 +13,7 @@ export function AdminPanel({ token }: { token: string }) {
   const [configStatus, setConfigStatus] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     async function load() {
@@ -54,6 +55,7 @@ export function AdminPanel({ token }: { token: string }) {
 
   async function saveConfig() {
     setConfigStatus("saving");
+    setErrorMsg("");
     try {
       const res = await fetch(
         `/api/config?token=${encodeURIComponent(token)}`,
@@ -67,9 +69,12 @@ export function AdminPanel({ token }: { token: string }) {
         setConfigStatus("saved");
         setTimeout(() => setConfigStatus("idle"), 2000);
       } else {
+        const data = await res.json().catch(() => null);
+        setErrorMsg(data?.error || `${res.status} ${res.statusText}`);
         setConfigStatus("error");
       }
-    } catch {
+    } catch (e) {
+      setErrorMsg(e instanceof Error ? e.message : "Network error");
       setConfigStatus("error");
     }
   }
@@ -146,7 +151,7 @@ export function AdminPanel({ token }: { token: string }) {
           )}
           {configStatus === "error" && (
             <span className="error" style={{ marginLeft: 12 }}>
-              SAVE FAILED
+              {errorMsg || "SAVE FAILED"}
             </span>
           )}
         </div>
