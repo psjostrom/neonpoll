@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0015"/>
+      <stop offset="100%" stop-color="#1a0030"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff6ec7"/>
+      <stop offset="100%" stop-color="#ff9a00"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="32" height="32" rx="6" fill="url(#bg)"/>
+  <!-- Grid floor -->
+  <line x1="4" y1="24" x2="16" y2="19" stroke="#ff6ec7" stroke-opacity="0.3" stroke-width="0.5"/>
+  <line x1="28" y1="24" x2="16" y2="19" stroke="#ff6ec7" stroke-opacity="0.3" stroke-width="0.5"/>
+  <line x1="2" y1="28" x2="16" y2="19" stroke="#ff6ec7" stroke-opacity="0.25" stroke-width="0.5"/>
+  <line x1="30" y1="28" x2="16" y2="19" stroke="#ff6ec7" stroke-opacity="0.25" stroke-width="0.5"/>
+  <line x1="0" y1="22" x2="32" y2="22" stroke="#ff6ec7" stroke-opacity="0.2" stroke-width="0.5"/>
+  <line x1="0" y1="25" x2="32" y2="25" stroke="#ff6ec7" stroke-opacity="0.2" stroke-width="0.5"/>
+  <line x1="0" y1="28" x2="32" y2="28" stroke="#ff6ec7" stroke-opacity="0.15" stroke-width="0.5"/>
+  <!-- Sun -->
+  <circle cx="16" cy="19" r="8" fill="url(#sun)"/>
+  <rect x="0" y="19" width="32" height="13" rx="0" fill="url(#bg)"/>
+  <!-- Sun glow -->
+  <circle cx="16" cy="19" r="8" fill="none" stroke="#ff6ec7" stroke-opacity="0.4" stroke-width="0.5"/>
+  <!-- Grid floor (on top of bg rect) -->
+  <line x1="4" y1="24" x2="16" y2="19" stroke="#ff6ec7" stroke-opacity="0.3" stroke-width="0.5"/>
+  <line x1="28" y1="24" x2="16" y2="19" stroke="#ff6ec7" stroke-opacity="0.3" stroke-width="0.5"/>
+  <line x1="2" y1="28" x2="16" y2="19" stroke="#ff6ec7" stroke-opacity="0.25" stroke-width="0.5"/>
+  <line x1="30" y1="28" x2="16" y2="19" stroke="#ff6ec7" stroke-opacity="0.25" stroke-width="0.5"/>
+  <line x1="0" y1="22" x2="32" y2="22" stroke="#ff6ec7" stroke-opacity="0.25" stroke-width="0.5"/>
+  <line x1="0" y1="25" x2="32" y2="25" stroke="#ff6ec7" stroke-opacity="0.2" stroke-width="0.5"/>
+  <line x1="0" y1="28" x2="32" y2="28" stroke="#ff6ec7" stroke-opacity="0.15" stroke-width="0.5"/>
+  <!-- N letter -->
+  <text x="16" y="16" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-weight="900" font-size="14" fill="#00fff2" opacity="0.9">N</text>
+</svg>
