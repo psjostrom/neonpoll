@@ -170,7 +170,7 @@ export function AdminPanel({ token }: { token: string }) {
         </div>
 
         {votes.length === 0 ? (
-          <p style={{ color: "rgba(255,255,255,0.4)", letterSpacing: 2 }}>
+          <p style={{ color: "#9090a0", letterSpacing: 2 }}>
             No responses yet
           </p>
         ) : (

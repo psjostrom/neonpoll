@@ -1,12 +1,12 @@
 :root {
   --bg-dark: #0a0015;
   --bg-mid: #1a0030;
-  --neon-pink: #ff6ec7;
-  --neon-cyan: #00fff2;
-  --neon-purple: #7b2fbe;
-  --vote-yes: #00ff41;
-  --vote-maybe: #ffa500;
-  --vote-no: #ff0040;
+  --neon-pink: #ff7fd3;
+  --neon-cyan: #5cfffa;
+  --neon-purple: #9b5de5;
+  --vote-yes: #39ff70;
+  --vote-maybe: #ffbe3d;
+  --vote-no: #ff5c7c;
   --glow-pink: 0 0 20px rgba(255, 110, 199, 0.6);
   --glow-cyan: 0 0 20px rgba(0, 255, 242, 0.6);
 }
@@ -118,7 +118,7 @@ body::after {
 }
 
 .description {
-  color: rgba(255, 255, 255, 0.75);
+  color: #d0d0d0;
   text-align: center;
   font-size: 0.9rem;
   margin-bottom: 24px;
@@ -148,7 +148,7 @@ textarea:focus {
 }
 
 input[type="text"]::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: #9090a0;
 }
 
 label {
@@ -197,8 +197,8 @@ label {
 /* Vote buttons */
 .vote-btn {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #e0e0e0;
   padding: 8px 0;
   flex: 1;
   font-size: 0.8rem;
@@ -216,36 +216,36 @@ label {
 }
 
 .vote-btn.yes {
-  border-color: rgba(0, 255, 65, 0.5);
-  color: rgba(0, 255, 65, 0.8);
+  border-color: var(--vote-yes);
+  color: var(--vote-yes);
 }
 .vote-btn.yes.active {
   background: var(--vote-yes);
   border-color: var(--vote-yes);
   color: #000;
-  box-shadow: 0 0 12px rgba(0, 255, 65, 0.5);
+  box-shadow: 0 0 14px rgba(57, 255, 112, 0.6);
 }
 
 .vote-btn.maybe {
-  border-color: rgba(255, 165, 0, 0.5);
-  color: rgba(255, 165, 0, 0.8);
+  border-color: var(--vote-maybe);
+  color: var(--vote-maybe);
 }
 .vote-btn.maybe.active {
   background: var(--vote-maybe);
   border-color: var(--vote-maybe);
   color: #000;
-  box-shadow: 0 0 12px rgba(255, 165, 0, 0.5);
+  box-shadow: 0 0 14px rgba(255, 190, 61, 0.6);
 }
 
 .vote-btn.no {
-  border-color: rgba(255, 0, 64, 0.5);
-  color: rgba(255, 0, 64, 0.8);
+  border-color: var(--vote-no);
+  color: var(--vote-no);
 }
 .vote-btn.no.active {
   background: var(--vote-no);
   border-color: var(--vote-no);
   color: #000;
-  box-shadow: 0 0 12px rgba(255, 0, 64, 0.5);
+  box-shadow: 0 0 14px rgba(255, 92, 124, 0.6);
 }
 
 /* Date card */
@@ -321,7 +321,7 @@ label {
 .results-table .cell-yes { color: var(--vote-yes); }
 .results-table .cell-maybe { color: var(--vote-maybe); }
 .results-table .cell-no { color: var(--vote-no); }
-.results-table .cell-none { color: rgba(255, 255, 255, 0.3); }
+.results-table .cell-none { color: #808090; }
 
 .summary-row {
   border-top: 2px solid var(--neon-pink) !important;
@@ -363,7 +363,7 @@ label {
 .date-chip button {
   background: none;
   border: none;
-  color: rgba(255, 0, 64, 0.6);
+  color: var(--vote-no);
   cursor: pointer;
   font-size: 0.85rem;
   padding: 0;
@@ -459,7 +459,7 @@ label {
 }
 
 .response-count {
-  color: rgba(255, 255, 255, 0.6);
+  color: #c0c0c0;
   font-size: 0.85rem;
   letter-spacing: 2px;
   margin-bottom: 12px;
@@ -525,23 +525,23 @@ label {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 0.7rem;
+  color: #9090a0;
+  font-size: 0.75rem;
   letter-spacing: 0;
 }
 
 .cal-day-header {
   text-align: center;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.7rem;
+  color: #b0b0c0;
+  font-size: 0.75rem;
   letter-spacing: 1px;
   padding: 6px 0;
 }
 
 .cal-day {
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(123, 47, 190, 0.3);
-  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(155, 93, 229, 0.4);
+  color: #e0e0e0;
   font-family: inherit;
   font-size: 0.9rem;
   padding: 10px 0;
