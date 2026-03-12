@@ -282,6 +282,20 @@ label {
   justify-content: center;
 }
 
+/* Week groups */
+.week-group {
+  margin-bottom: 20px;
+}
+
+.week-label {
+  color: var(--neon-purple);
+  font-size: 0.8rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  padding-left: 2px;
+}
+
 /* Date grid */
 .date-grid {
   display: grid;

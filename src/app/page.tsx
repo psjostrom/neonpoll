@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatDate } from "@/lib/types";
+import { formatDate, getIsoWeek } from "@/lib/types";
 import type { PollConfig, Vote, VoteValue } from "@/lib/types";
 
 export default function VotingPage() {
@@ -139,24 +139,35 @@ export default function VotingPage() {
         />
       </div>
 
-      <div className="date-grid">
-        {config.dates.map((date) => (
-          <div key={date} className="date-card">
-            <div className="date-label">{formatDate(date)}</div>
-            <div className="vote-group">
-              {(["yes", "maybe", "no"] as VoteValue[]).map((v) => (
-                <button
-                  key={v}
-                  className={`vote-btn ${v}${votes[date] === v ? " active" : ""}`}
-                  onClick={() => toggleVote(date, v)}
-                >
-                  {v === "yes" ? "YES" : v === "maybe" ? "MEH" : "NO"}
-                </button>
-              ))}
-            </div>
+      {Object.entries(
+        config.dates.reduce<Record<number, string[]>>((groups, date) => {
+          const week = getIsoWeek(date);
+          (groups[week] ??= []).push(date);
+          return groups;
+        }, {})
+      ).map(([week, weekDates]) => (
+        <div key={week} className="week-group">
+          <div className="week-label">W{week}</div>
+          <div className="date-grid">
+            {weekDates.map((date) => (
+              <div key={date} className="date-card">
+                <div className="date-label">{formatDate(date)}</div>
+                <div className="vote-group">
+                  {(["yes", "maybe", "no"] as VoteValue[]).map((v) => (
+                    <button
+                      key={v}
+                      className={`vote-btn ${v}${votes[date] === v ? " active" : ""}`}
+                      onClick={() => toggleVote(date, v)}
+                    >
+                      {v === "yes" ? "YES" : v === "maybe" ? "MEH" : "NO"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
 
       <div className="submit-row">
         <button

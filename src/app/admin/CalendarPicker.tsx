@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { getIsoWeek } from "@/lib/types";
 
 function toIso(year: number, month: number, day: number) {
   return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -22,12 +23,8 @@ const MONTH_NAMES = [
 
 const DAY_HEADERS = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
 
-function getIsoWeek(year: number, month: number, day: number) {
-  const date = new Date(year, month, day);
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+function getCalWeek(year: number, month: number, day: number) {
+  return getIsoWeek(toIso(year, month, day));
 }
 
 export function CalendarPicker({
@@ -90,8 +87,8 @@ export function CalendarPicker({
           const weekLabel = i % 7 === 0 ? (
             <span key={`w${i}`} className="cal-wk">
               {day !== null
-                ? getIsoWeek(view.year, view.month, day)
-                : getIsoWeek(
+                ? getCalWeek(view.year, view.month, day)
+                : getCalWeek(
                     view.month === 0 ? view.year - 1 : view.year,
                     view.month === 0 ? 11 : view.month - 1,
                     new Date(view.year, view.month, 0).getDate()
