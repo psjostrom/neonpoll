@@ -170,6 +170,37 @@ export function AdminPanel({ token }: { token: string }) {
           </button>
         </div>
 
+        {votes.length > 0 && dates.length > 0 && (() => {
+          const ranked = dates
+            .map((date) => ({
+              date,
+              yes: votes.filter((v) => v.votes[date] === "yes").length,
+              maybe: votes.filter((v) => v.votes[date] === "maybe").length,
+            }))
+            .sort((a, b) => b.yes - a.yes || b.maybe - a.maybe);
+          const topYes = ranked[0].yes;
+          return (
+            <div className="scoreboard">
+              {ranked.map((entry, i) => (
+                <div
+                  key={entry.date}
+                  className={`scoreboard-row${entry.yes === topYes && topYes > 0 ? " scoreboard-top" : ""}`}
+                >
+                  <span className="scoreboard-rank">{i + 1}</span>
+                  <span className="scoreboard-date">{formatDate(entry.date)}</span>
+                  <span className="scoreboard-bar" style={{
+                    width: `${topYes > 0 ? (entry.yes / topYes) * 100 : 0}%`,
+                  }} />
+                  <span className="scoreboard-count">
+                    {entry.yes} YES
+                    {entry.maybe > 0 && <span className="scoreboard-maybe"> / {entry.maybe} MEH</span>}
+                  </span>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+
         {votes.length === 0 ? (
           <p style={{ color: "#9090a0", letterSpacing: 2 }}>
             No responses yet
