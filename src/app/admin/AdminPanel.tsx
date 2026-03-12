@@ -177,14 +177,16 @@ export function AdminPanel({ token }: { token: string }) {
               yes: votes.filter((v) => v.votes[date] === "yes").length,
               maybe: votes.filter((v) => v.votes[date] === "maybe").length,
             }))
-            .sort((a, b) => b.yes - a.yes || b.maybe - a.maybe);
+            .sort((a, b) => (b.yes + b.maybe * 0.5) - (a.yes + a.maybe * 0.5) || b.yes - a.yes);
           const total = votes.length;
           const topScore = ranked[0].yes;
           return (
             <div className="scoreboard">
               {ranked.map((entry, i) => {
-                const yesPct = total > 0 ? (entry.yes / total) * 100 : 0;
-                const mehPct = total > 0 ? (entry.maybe / total) * 100 : 0;
+                const score = entry.yes + entry.maybe * 0.5;
+                const maxScore = total;
+                const barPct = maxScore > 0 ? (score / maxScore) * 100 : 0;
+                const yesPct = maxScore > 0 ? (entry.yes / maxScore) * 100 : 0;
                 return (
                   <div
                     key={entry.date}
@@ -194,8 +196,8 @@ export function AdminPanel({ token }: { token: string }) {
                     <span className="scoreboard-date">{formatDate(entry.date)}</span>
                     <span className="scoreboard-bar-track">
                       <span className="scoreboard-bar-yes" style={{ width: `${yesPct}%` }} />
-                      {mehPct > 0 && (
-                        <span className="scoreboard-bar-meh" style={{ width: `${mehPct}%` }} />
+                      {barPct > yesPct && (
+                        <span className="scoreboard-bar-meh" style={{ width: `${barPct - yesPct}%` }} />
                       )}
                     </span>
                     <span className="scoreboard-count">
