@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { formatDate } from "@/lib/types";
 import type { PollConfig, Vote, VoteValue } from "@/lib/types";
+import { CalendarPicker } from "./CalendarPicker";
 
 export function AdminPanel({ token }: { token: string }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dates, setDates] = useState<string[]>([]);
-  const [newDate, setNewDate] = useState("");
   const [votes, setVotes] = useState<Vote[]>([]);
   const [configStatus, setConfigStatus] = useState<
     "idle" | "saving" | "saved" | "error"
@@ -74,16 +74,6 @@ export function AdminPanel({ token }: { token: string }) {
     }
   }
 
-  function addDate() {
-    if (!newDate || dates.includes(newDate)) return;
-    setDates([...dates, newDate].sort());
-    setNewDate("");
-  }
-
-  function removeDate(date: string) {
-    setDates(dates.filter((d) => d !== date));
-  }
-
   function cellIcon(value: VoteValue | undefined) {
     if (value === "yes") return { text: "\u2713", cls: "cell-yes" };
     if (value === "maybe") return { text: "?", cls: "cell-maybe" };
@@ -126,21 +116,8 @@ export function AdminPanel({ token }: { token: string }) {
         </div>
 
         <div className="form-group">
-          <label>Add Dates</label>
-          <div className="form-row">
-            <input
-              type="date"
-              value={newDate}
-              onChange={(e) => setNewDate(e.target.value)}
-            />
-            <button
-              className="btn-primary btn-small"
-              onClick={addDate}
-              disabled={!newDate}
-            >
-              ADD
-            </button>
-          </div>
+          <label>Select Dates</label>
+          <CalendarPicker selected={dates} onChange={setDates} />
         </div>
 
         {dates.length > 0 && (
@@ -148,7 +125,7 @@ export function AdminPanel({ token }: { token: string }) {
             {dates.map((date) => (
               <span key={date} className="date-chip">
                 {formatDate(date)}
-                <button onClick={() => removeDate(date)}>&times;</button>
+                <button onClick={() => setDates(dates.filter((d) => d !== date))}>&times;</button>
               </span>
             ))}
           </div>
