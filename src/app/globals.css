@@ -453,7 +453,8 @@ label {
   color: #e0e0e0;
   font-size: 0.8rem;
   white-space: nowrap;
-  margin-left: auto;
+  width: 140px;
+  text-align: right;
   flex-shrink: 0;
 }
 
