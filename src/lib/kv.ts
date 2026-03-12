@@ -24,16 +24,21 @@ export async function setVote(vote: Vote): Promise<void> {
 
 export async function getAllVotes(): Promise<Vote[]> {
   const keys: string[] = [];
-  let cursor = 0;
+  const initial = await kv.scan(0, {
+    match: VOTE_PREFIX + "*",
+    count: 100,
+  });
+  let cursor = initial[0];
+  keys.push(...initial[1]);
 
-  do {
-    const [nextCursor, batch] = await kv.scan(cursor, {
+  while (Number(cursor) !== 0) {
+    const page = await kv.scan(cursor, {
       match: VOTE_PREFIX + "*",
       count: 100,
     });
-    cursor = nextCursor;
-    keys.push(...batch);
-  } while (cursor !== 0);
+    cursor = page[0];
+    keys.push(...page[1]);
+  }
 
   if (keys.length === 0) return [];
 
