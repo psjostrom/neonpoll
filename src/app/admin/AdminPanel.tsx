@@ -188,9 +188,11 @@ export function AdminPanel({ token }: { token: string }) {
                 >
                   <span className="scoreboard-rank">{i + 1}</span>
                   <span className="scoreboard-date">{formatDate(entry.date)}</span>
-                  <span className="scoreboard-bar" style={{
-                    width: `${topYes > 0 ? (entry.yes / topYes) * 100 : 0}%`,
-                  }} />
+                  <span className="scoreboard-bar-track">
+                    <span className="scoreboard-bar" style={{
+                      width: `${topYes > 0 ? (entry.yes / topYes) * 100 : 0}%`,
+                    }} />
+                  </span>
                   <span className="scoreboard-count">
                     {entry.yes} YES
                     {entry.maybe > 0 && <span className="scoreboard-maybe"> / {entry.maybe} MEH</span>}

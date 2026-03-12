@@ -436,11 +436,16 @@ label {
   flex-shrink: 0;
 }
 
+.scoreboard-bar-track {
+  flex: 1;
+  min-width: 0;
+}
+
 .scoreboard-bar {
+  display: block;
   height: 6px;
   background: linear-gradient(90deg, var(--neon-pink), var(--neon-purple));
   border-radius: 3px;
-  min-width: 0;
   transition: width 0.3s;
 }
 
