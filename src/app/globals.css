@@ -513,6 +513,20 @@ label {
   gap: 4px;
 }
 
+.cal-grid.cal-grid-wk {
+  grid-template-columns: 28px repeat(7, 1fr);
+}
+
+.cal-wk-header,
+.cal-wk {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 0.6rem;
+  letter-spacing: 0;
+}
+
 .cal-day-header {
   text-align: center;
   color: rgba(255, 255, 255, 0.35);

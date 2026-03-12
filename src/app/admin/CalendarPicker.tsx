@@ -22,6 +22,14 @@ const MONTH_NAMES = [
 
 const DAY_HEADERS = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
 
+function getIsoWeek(year: number, month: number, day: number) {
+  const date = new Date(year, month, day);
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+}
+
 export function CalendarPicker({
   selected,
   onChange,
@@ -73,24 +81,41 @@ export function CalendarPicker({
         </span>
         <button className="cal-nav" onClick={nextMonth}>&raquo;</button>
       </div>
-      <div className="cal-grid">
+      <div className="cal-grid cal-grid-wk">
+        <span className="cal-day-header cal-wk-header">W</span>
         {DAY_HEADERS.map((d) => (
           <span key={d} className="cal-day-header">{d}</span>
         ))}
         {cells.map((day, i) => {
-          if (day === null) return <span key={`e${i}`} />;
+          const weekLabel = i % 7 === 0 ? (
+            <span key={`w${i}`} className="cal-wk">
+              {day !== null
+                ? getIsoWeek(view.year, view.month, day)
+                : getIsoWeek(
+                    view.month === 0 ? view.year - 1 : view.year,
+                    view.month === 0 ? 11 : view.month - 1,
+                    new Date(view.year, view.month, 0).getDate()
+                  )}
+            </span>
+          ) : null;
+
+          if (day === null) {
+            return [weekLabel, <span key={`e${i}`} />].filter(Boolean);
+          }
+
           const iso = toIso(view.year, view.month, day);
           const isSelected = selectedSet.has(iso);
           const isToday = iso === todayIso;
-          return (
+          return [
+            weekLabel,
             <button
               key={iso}
               className={`cal-day${isSelected ? " cal-selected" : ""}${isToday ? " cal-today" : ""}`}
               onClick={() => toggleDate(day)}
             >
               {day}
-            </button>
-          );
+            </button>,
+          ].filter(Boolean);
         })}
       </div>
     </div>
