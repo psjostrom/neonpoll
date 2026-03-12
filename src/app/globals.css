@@ -439,13 +439,22 @@ label {
 .scoreboard-bar-track {
   flex: 1;
   min-width: 0;
+  display: flex;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
 }
 
-.scoreboard-bar {
-  display: block;
-  height: 6px;
-  background: linear-gradient(90deg, var(--neon-pink), var(--neon-purple));
-  border-radius: 3px;
+.scoreboard-bar-yes {
+  height: 100%;
+  background: var(--vote-yes);
+  transition: width 0.3s;
+}
+
+.scoreboard-bar-meh {
+  height: 100%;
+  background: var(--vote-maybe);
   transition: width 0.3s;
 }
 

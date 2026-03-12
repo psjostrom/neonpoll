@@ -178,27 +178,33 @@ export function AdminPanel({ token }: { token: string }) {
               maybe: votes.filter((v) => v.votes[date] === "maybe").length,
             }))
             .sort((a, b) => b.yes - a.yes || b.maybe - a.maybe);
-          const topYes = ranked[0].yes;
+          const total = votes.length;
+          const topScore = ranked[0].yes;
           return (
             <div className="scoreboard">
-              {ranked.map((entry, i) => (
-                <div
-                  key={entry.date}
-                  className={`scoreboard-row${entry.yes === topYes && topYes > 0 ? " scoreboard-top" : ""}`}
-                >
-                  <span className="scoreboard-rank">{i + 1}</span>
-                  <span className="scoreboard-date">{formatDate(entry.date)}</span>
-                  <span className="scoreboard-bar-track">
-                    <span className="scoreboard-bar" style={{
-                      width: `${topYes > 0 ? (entry.yes / topYes) * 100 : 0}%`,
-                    }} />
-                  </span>
-                  <span className="scoreboard-count">
-                    {entry.yes} YES
-                    {entry.maybe > 0 && <span className="scoreboard-maybe"> / {entry.maybe} MEH</span>}
-                  </span>
-                </div>
-              ))}
+              {ranked.map((entry, i) => {
+                const yesPct = total > 0 ? (entry.yes / total) * 100 : 0;
+                const mehPct = total > 0 ? (entry.maybe / total) * 100 : 0;
+                return (
+                  <div
+                    key={entry.date}
+                    className={`scoreboard-row${entry.yes === topScore && topScore > 0 ? " scoreboard-top" : ""}`}
+                  >
+                    <span className="scoreboard-rank">{i + 1}</span>
+                    <span className="scoreboard-date">{formatDate(entry.date)}</span>
+                    <span className="scoreboard-bar-track">
+                      <span className="scoreboard-bar-yes" style={{ width: `${yesPct}%` }} />
+                      {mehPct > 0 && (
+                        <span className="scoreboard-bar-meh" style={{ width: `${mehPct}%` }} />
+                      )}
+                    </span>
+                    <span className="scoreboard-count">
+                      {entry.yes} YES
+                      {entry.maybe > 0 && <span className="scoreboard-maybe"> / {entry.maybe} MEH</span>}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           );
         })()}
