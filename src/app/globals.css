@@ -123,6 +123,17 @@ body::after {
   font-size: 0.9rem;
   margin-bottom: 24px;
   letter-spacing: 1px;
+  white-space: pre-line;
+}
+
+.description a {
+  color: var(--neon-cyan);
+  text-decoration: underline;
+  word-break: break-all;
+}
+
+.description a:hover {
+  text-shadow: 0 0 8px rgba(92, 255, 250, 0.5);
 }
 
 /* Inputs */

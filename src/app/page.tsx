@@ -116,7 +116,17 @@ export default function VotingPage() {
       <h1 className="title">NEONPOLL</h1>
       <p className="subtitle">{config.title}</p>
       {config.description && (
-        <p className="description">{config.description}</p>
+        <p className="description">
+          {config.description.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
+            /^https?:\/\//.test(part) ? (
+              <a key={i} href={part} target="_blank" rel="noopener noreferrer">
+                {part}
+              </a>
+            ) : (
+              part
+            )
+          )}
+        </p>
       )}
 
       <div className="name-input">
