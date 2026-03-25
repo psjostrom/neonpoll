@@ -14,6 +14,8 @@ export function AdminPanel({ token }: { token: string }) {
     "idle" | "saving" | "saved" | "error"
   >("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [wipeConfirm, setWipeConfirm] = useState(false);
+  const [wiping, setWiping] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -156,6 +158,58 @@ export function AdminPanel({ token }: { token: string }) {
             </span>
           )}
         </div>
+      </div>
+
+      <div className="admin-section">
+        <h2>DANGER ZONE</h2>
+        <p style={{ color: "#9090a0", letterSpacing: 1, marginBottom: 12, fontSize: 14 }}>
+          Wipe all votes and config to start a new poll from scratch.
+        </p>
+        {!wipeConfirm ? (
+          <button
+            className="btn-primary btn-danger"
+            onClick={() => setWipeConfirm(true)}
+            disabled={wiping}
+          >
+            WIPE ALL DATA
+          </button>
+        ) : (
+          <div className="wipe-confirm">
+            <span style={{ color: "#ff4466", letterSpacing: 1 }}>ARE YOU SURE?</span>
+            <button
+              className="btn-primary btn-danger"
+              disabled={wiping}
+              onClick={async () => {
+                setWiping(true);
+                try {
+                  const res = await fetch(
+                    `/api/votes?token=${encodeURIComponent(token)}`,
+                    { method: "DELETE" }
+                  );
+                  if (res.ok) {
+                    setTitle("");
+                    setDescription("");
+                    setDates([]);
+                    setVotes([]);
+                    setWipeConfirm(false);
+                  }
+                } catch {
+                  // wipe failed
+                } finally {
+                  setWiping(false);
+                }
+              }}
+            >
+              {wiping ? "WIPING..." : "YES, WIPE EVERYTHING"}
+            </button>
+            <button
+              className="btn-primary btn-small"
+              onClick={() => setWipeConfirm(false)}
+            >
+              CANCEL
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="admin-section">

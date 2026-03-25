@@ -205,6 +205,23 @@ label {
   letter-spacing: 2px;
 }
 
+.btn-danger {
+  background: linear-gradient(180deg, #cc2244 0%, #991133 100%);
+  box-shadow: 0 0 15px rgba(255, 34, 68, 0.3);
+}
+
+.btn-danger:hover {
+  background: linear-gradient(180deg, #ee3355 0%, #bb2244 100%);
+  box-shadow: 0 0 25px rgba(255, 34, 68, 0.5);
+}
+
+.wipe-confirm {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 /* Vote buttons */
 .vote-btn {
   background: transparent;

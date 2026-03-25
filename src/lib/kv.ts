@@ -45,3 +45,26 @@ export async function getAllVotes(): Promise<Vote[]> {
   const values = await kv.mget<Vote[]>(...keys);
   return values.filter((v): v is Vote => v !== null);
 }
+
+export async function deleteAllData(): Promise<void> {
+  const keys: string[] = [CONFIG_KEY];
+  const initial = await kv.scan(0, {
+    match: VOTE_PREFIX + "*",
+    count: 100,
+  });
+  let cursor = initial[0];
+  keys.push(...initial[1]);
+
+  while (Number(cursor) !== 0) {
+    const page = await kv.scan(cursor, {
+      match: VOTE_PREFIX + "*",
+      count: 100,
+    });
+    cursor = page[0];
+    keys.push(...page[1]);
+  }
+
+  if (keys.length > 0) {
+    await kv.del(...keys);
+  }
+}
