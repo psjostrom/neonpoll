@@ -24,9 +24,7 @@ export default function VotingPage() {
           return;
         }
         const data = await res.json();
-        if (data.title && data.dates?.length > 0) {
-          setConfig(data);
-        }
+        setConfig(data);
 
         const savedName = localStorage.getItem(`neonpoll-name-${slug}`);
         if (savedName) {
@@ -68,14 +66,36 @@ export default function VotingPage() {
     }
   }
 
-  function toggleVote(date: string, value: VoteValue) {
+  function toggleYesMaybeNo(key: string, value: VoteValue) {
     setVotes((prev) => {
-      if (prev[date] === value) {
+      if (prev[key] === value) {
         const next = { ...prev };
-        delete next[date];
+        delete next[key];
         return next;
       }
-      return { ...prev, [date]: value };
+      return { ...prev, [key]: value };
+    });
+  }
+
+  function toggleSingleChoice(key: string) {
+    setVotes((prev) => {
+      if (prev[key] === "yes") {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      }
+      return { [key]: "yes" as VoteValue };
+    });
+  }
+
+  function toggleMultiSelect(key: string) {
+    setVotes((prev) => {
+      if (prev[key] === "yes") {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      }
+      return { ...prev, [key]: "yes" as VoteValue };
     });
   }
 
@@ -92,9 +112,7 @@ export default function VotingPage() {
       <div className="container" style={{ paddingTop: "30vh" }}>
         <div className="sun" />
         <h1 className="title">NEONPOLL</h1>
-        <p className="subtitle" style={{ marginTop: 20 }}>
-          POLL NOT FOUND
-        </p>
+        <p className="subtitle" style={{ marginTop: 20 }}>POLL NOT FOUND</p>
       </div>
     );
   }
@@ -104,9 +122,7 @@ export default function VotingPage() {
       <div className="container" style={{ paddingTop: "30vh" }}>
         <div className="sun" />
         <h1 className="title">NEONPOLL</h1>
-        <p className="subtitle" style={{ marginTop: 20 }}>
-          POLL NOT SET UP YET
-        </p>
+        <p className="subtitle" style={{ marginTop: 20 }}>POLL NOT SET UP YET</p>
       </div>
     );
   }
@@ -118,14 +134,65 @@ export default function VotingPage() {
         <h1 className="thanks-heading">THANKS!</h1>
         <p className="subtitle">YOUR RESPONSE HAS BEEN RECORDED</p>
         <div className="submit-row" style={{ marginTop: 30 }}>
-          <button
-            className="btn-primary"
-            onClick={() => setSubmitted(false)}
-          >
+          <button className="btn-primary" onClick={() => setSubmitted(false)}>
             UPDATE RESPONSE
           </button>
         </div>
       </div>
+    );
+  }
+
+  // Build items list
+  const items =
+    config.type === "date"
+      ? config.dates.map((d) => ({ key: d, label: formatDate(d), desc: undefined as string | undefined, week: getIsoWeek(d) }))
+      : config.options.map((o) => ({ key: o.id, label: o.title, desc: o.description, week: 0 }));
+
+  // Group by week for date polls
+  const grouped =
+    config.type === "date"
+      ? Object.entries(
+          items.reduce<Record<number, typeof items>>((g, item) => {
+            (g[item.week] ??= []).push(item);
+            return g;
+          }, {})
+        )
+      : [["0", items] as const];
+
+  function renderVoteControls(key: string) {
+    if (config!.votingStyle === "yes-maybe-no") {
+      return (
+        <div className="vote-group">
+          {(["yes", "maybe", "no"] as VoteValue[]).map((v) => (
+            <button
+              key={v}
+              className={`vote-btn ${v}${votes[key] === v ? " active" : ""}`}
+              onClick={() => toggleYesMaybeNo(key, v)}
+            >
+              {v === "yes" ? "YES" : v === "maybe" ? "MEH" : "NO"}
+            </button>
+          ))}
+        </div>
+      );
+    }
+    if (config!.votingStyle === "single-choice") {
+      return (
+        <button
+          className={`vote-toggle${votes[key] === "yes" ? " vote-toggle-active" : ""}`}
+          onClick={() => toggleSingleChoice(key)}
+        >
+          {votes[key] === "yes" ? "SELECTED" : "SELECT"}
+        </button>
+      );
+    }
+    // multi-select
+    return (
+      <button
+        className={`vote-toggle vote-toggle-multi${votes[key] === "yes" ? " vote-toggle-active" : ""}`}
+        onClick={() => toggleMultiSelect(key)}
+      >
+        {votes[key] === "yes" ? "SELECTED" : "SELECT"}
+      </button>
     );
   }
 
@@ -138,9 +205,7 @@ export default function VotingPage() {
         <p className="description">
           {config.description.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
             /^https?:\/\//.test(part) ? (
-              <a key={i} href={part} target="_blank" rel="noopener noreferrer">
-                {part}
-              </a>
+              <a key={i} href={part} target="_blank" rel="noopener noreferrer">{part}</a>
             ) : (
               part
             )
@@ -158,30 +223,15 @@ export default function VotingPage() {
         />
       </div>
 
-      {Object.entries(
-        config.dates.reduce<Record<number, string[]>>((groups, date) => {
-          const week = getIsoWeek(date);
-          (groups[week] ??= []).push(date);
-          return groups;
-        }, {})
-      ).map(([week, weekDates]) => (
+      {grouped.map(([week, weekItems]) => (
         <div key={week} className="week-group">
-          <div className="week-label">W{week}</div>
+          {config.type === "date" && <div className="week-label">W{week}</div>}
           <div className="date-grid">
-            {weekDates.map((date) => (
-              <div key={date} className="date-card">
-                <div className="date-label">{formatDate(date)}</div>
-                <div className="vote-group">
-                  {(["yes", "maybe", "no"] as VoteValue[]).map((v) => (
-                    <button
-                      key={v}
-                      className={`vote-btn ${v}${votes[date] === v ? " active" : ""}`}
-                      onClick={() => toggleVote(date, v)}
-                    >
-                      {v === "yes" ? "YES" : v === "maybe" ? "MEH" : "NO"}
-                    </button>
-                  ))}
-                </div>
+            {weekItems.map((item) => (
+              <div key={item.key} className="date-card">
+                <div className="date-label">{item.label}</div>
+                {item.desc && <div className="option-card-desc">{item.desc}</div>}
+                {renderVoteControls(item.key)}
               </div>
             ))}
           </div>
