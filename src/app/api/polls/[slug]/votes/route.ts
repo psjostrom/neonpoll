@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getConfig, getAllVotes } from "@/lib/kv";
 import { validatePollToken } from "@/lib/auth";
+import { computeSummary } from "@/lib/summary";
 
 export async function GET(
   request: NextRequest,
@@ -19,5 +20,6 @@ export async function GET(
   }
 
   const votes = await getAllVotes(slug);
-  return NextResponse.json({ votes });
+  const summary = computeSummary(config, votes);
+  return NextResponse.json({ votes, summary });
 }
