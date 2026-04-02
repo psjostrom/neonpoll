@@ -3,14 +3,21 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarPicker } from "@/app/components/CalendarPicker";
+import { PollTypeSelector } from "@/app/components/PollTypeSelector";
+import { VotingStyleSelector } from "@/app/components/VotingStyleSelector";
+import { OptionEditor } from "@/app/components/OptionEditor";
 import { formatDate } from "@/lib/types";
+import type { PollType, VotingStyle, PollOption } from "@/lib/types";
 
 export default function CreatePollPage() {
   const router = useRouter();
+  const [pollType, setPollType] = useState<PollType>("date");
+  const [votingStyle, setVotingStyle] = useState<VotingStyle>("yes-maybe-no");
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [dates, setDates] = useState<string[]>([]);
+  const [options, setOptions] = useState<PollOption[]>([]);
   const [error, setError] = useState("");
   const [creating, setCreating] = useState(false);
   const [slugStatus, setSlugStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
@@ -32,14 +39,37 @@ export default function CreatePollPage() {
     }
   }
 
+  const canCreate =
+    title.trim() &&
+    slug.length >= 3 &&
+    (pollType === "date" ? dates.length > 0 : options.length >= 2);
+
   async function handleCreate() {
     setError("");
     setCreating(true);
     try {
+      const body: Record<string, unknown> = {
+        type: pollType,
+        votingStyle,
+        slug,
+        title,
+        description,
+      };
+      if (pollType === "date") {
+        body.dates = dates;
+        body.options = [];
+      } else {
+        body.options = options.map((o) => ({
+          title: o.title,
+          ...(o.description ? { description: o.description } : {}),
+        }));
+        body.dates = [];
+      }
+
       const res = await fetch("/api/polls", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug, title, description, dates }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -48,7 +78,7 @@ export default function CreatePollPage() {
         return;
       }
       const data = await res.json();
-      router.push(`/p/${data.slug}/admin?token=${encodeURIComponent(data.adminToken)}`);
+      router.push(data.adminUrl);
     } catch {
       setError("Network error. Try again.");
       setCreating(false);
@@ -63,10 +93,15 @@ export default function CreatePollPage() {
 
       <div className="admin-section" style={{ marginTop: 20 }}>
         <div className="form-group">
+          <label>Poll Type</label>
+          <PollTypeSelector value={pollType} onChange={setPollType} />
+        </div>
+
+        <div className="form-group">
           <label>Event Title</label>
           <input
             type="text"
-            placeholder="Friday dinner?"
+            placeholder={pollType === "date" ? "Friday dinner?" : "Best team activity?"}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             maxLength={100}
@@ -77,7 +112,7 @@ export default function CreatePollPage() {
           <label>Poll URL Slug</label>
           <input
             type="text"
-            placeholder="friday-dinner"
+            placeholder={pollType === "date" ? "friday-dinner" : "team-activity"}
             value={slug}
             onChange={(e) => handleSlugChange(e.target.value)}
             onBlur={checkSlug}
@@ -110,18 +145,31 @@ export default function CreatePollPage() {
         </div>
 
         <div className="form-group">
-          <label>Select Dates</label>
-          <CalendarPicker selected={dates} onChange={setDates} />
+          <label>Voting Style</label>
+          <VotingStyleSelector value={votingStyle} onChange={setVotingStyle} />
         </div>
 
-        {dates.length > 0 && (
-          <div className="date-chips">
-            {dates.map((date) => (
-              <span key={date} className="date-chip">
-                {formatDate(date)}
-                <button onClick={() => setDates(dates.filter((d) => d !== date))}>&times;</button>
-              </span>
-            ))}
+        {pollType === "date" ? (
+          <>
+            <div className="form-group">
+              <label>Select Dates</label>
+              <CalendarPicker selected={dates} onChange={setDates} />
+            </div>
+            {dates.length > 0 && (
+              <div className="date-chips">
+                {dates.map((date) => (
+                  <span key={date} className="date-chip">
+                    {formatDate(date)}
+                    <button onClick={() => setDates(dates.filter((d) => d !== date))}>&times;</button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="form-group">
+            <label>Options ({options.length}/30)</label>
+            <OptionEditor options={options} onChange={setOptions} />
           </div>
         )}
 
@@ -129,7 +177,7 @@ export default function CreatePollPage() {
           <button
             className="btn-primary"
             onClick={handleCreate}
-            disabled={creating || !title.trim() || slug.length < 3 || dates.length === 0}
+            disabled={creating || !canCreate}
           >
             {creating ? "CREATING..." : "CREATE POLL"}
           </button>
