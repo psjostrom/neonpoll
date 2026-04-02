@@ -712,3 +712,18 @@ label {
   text-decoration: none;
   display: inline-block;
 }
+
+/* Slug preview */
+.slug-preview {
+  display: block;
+  color: #9090a0;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+.slug-status {
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  margin-left: 8px;
+}
