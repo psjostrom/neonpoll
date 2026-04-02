@@ -6,6 +6,7 @@ const STYLES: { value: VotingStyle; label: string; desc: string }[] = [
   { value: "yes-maybe-no", label: "YES / MAYBE / NO", desc: "Three-state per option" },
   { value: "single-choice", label: "SINGLE CHOICE", desc: "Pick exactly one" },
   { value: "multi-select", label: "MULTI-SELECT", desc: "Check all that apply" },
+  { value: "ranked", label: "RANKED", desc: "Rank your top picks" },
 ];
 
 export function VotingStyleSelector({

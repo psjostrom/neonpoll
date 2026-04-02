@@ -18,6 +18,8 @@ export function AdminPanel({ slug, token }: { slug: string; token: string }) {
   const [votingStyle, setVotingStyle] = useState<VotingStyle>("yes-maybe-no");
   const [dates, setDates] = useState<string[]>([]);
   const [options, setOptions] = useState<PollOption[]>([]);
+  const [rankCount, setRankCount] = useState(3);
+  const [rankWeighted, setRankWeighted] = useState(true);
   const [votes, setVotes] = useState<Vote[]>([]);
   const [ranked, setRanked] = useState<RankedItem[]>([]);
   const [configStatus, setConfigStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -45,6 +47,8 @@ export function AdminPanel({ slug, token }: { slug: string; token: string }) {
           setVotingStyle(data.votingStyle);
           setDates(data.dates || []);
           setOptions(data.options || []);
+          setRankCount(data.rankCount ?? 3);
+          setRankWeighted(data.rankWeighted ?? true);
         }
 
         if (votesRes.ok) {
@@ -83,6 +87,10 @@ export function AdminPanel({ slug, token }: { slug: string; token: string }) {
         body.dates = dates;
       } else {
         body.options = options;
+      }
+      if (votingStyle === "ranked") {
+        body.rankCount = rankCount;
+        body.rankWeighted = rankWeighted;
       }
 
       const res = await fetch(
@@ -201,6 +209,40 @@ export function AdminPanel({ slug, token }: { slug: string; token: string }) {
           <VotingStyleSelector value={votingStyle} onChange={setVotingStyle} />
         </div>
 
+        {votingStyle === "ranked" && (
+          <div className="form-group">
+            <label>Number of Picks</label>
+            <div className="rank-config">
+              <input
+                type="number"
+                min={1}
+                max={pollType === "date" ? Math.max(dates.length, 1) : Math.max(options.length, 2)}
+                value={rankCount}
+                onChange={(e) => setRankCount(Math.max(1, parseInt(e.target.value) || 1))}
+                className="rank-count-input"
+              />
+              <div className="rank-weight-toggle">
+                <button
+                  className={`style-btn${rankWeighted ? " style-active" : ""}`}
+                  onClick={() => setRankWeighted(true)}
+                  type="button"
+                >
+                  <span className="style-label">WEIGHTED</span>
+                  <span className="style-desc">1st worth more</span>
+                </button>
+                <button
+                  className={`style-btn${!rankWeighted ? " style-active" : ""}`}
+                  onClick={() => setRankWeighted(false)}
+                  type="button"
+                >
+                  <span className="style-label">EQUAL</span>
+                  <span className="style-desc">All picks same</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {pollType === "date" ? (
           <>
             <div className="form-group">
@@ -290,7 +332,7 @@ export function AdminPanel({ slug, token }: { slug: string; token: string }) {
             <BarChart
               items={ranked.map((r) => ({
                 label: pollType === "date" ? formatDate(r.id) : r.title,
-                count: r.voteCount,
+                count: r.score ?? r.voteCount,
               }))}
             />
           )
@@ -326,7 +368,11 @@ export function AdminPanel({ slug, token }: { slug: string; token: string }) {
                               const { text, cls } = cellIcon(vote.votes[key]);
                               return <td key={key} className={cls}>{text}</td>;
                             }
-                            const selected = vote.votes[key] === "yes";
+                            const val = vote.votes[key];
+                            if (votingStyle === "ranked" && val) {
+                              return <td key={key} className="cell-rank">#{val}</td>;
+                            }
+                            const selected = val === "yes";
                             return (
                               <td key={key} className={selected ? "cell-yes" : "cell-none"}>
                                 {selected ? "\u2713" : "\u2013"}

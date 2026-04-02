@@ -18,6 +18,8 @@ export default function CreatePollPage() {
   const [description, setDescription] = useState("");
   const [dates, setDates] = useState<string[]>([]);
   const [options, setOptions] = useState<PollOption[]>([]);
+  const [rankCount, setRankCount] = useState(3);
+  const [rankWeighted, setRankWeighted] = useState(true);
   const [error, setError] = useState("");
   const [creating, setCreating] = useState(false);
   const [slugStatus, setSlugStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
@@ -64,6 +66,10 @@ export default function CreatePollPage() {
           ...(o.description ? { description: o.description } : {}),
         }));
         body.dates = [];
+      }
+      if (votingStyle === "ranked") {
+        body.rankCount = rankCount;
+        body.rankWeighted = rankWeighted;
       }
 
       const res = await fetch("/api/polls", {
@@ -148,6 +154,40 @@ export default function CreatePollPage() {
           <label>Voting Style</label>
           <VotingStyleSelector value={votingStyle} onChange={setVotingStyle} />
         </div>
+
+        {votingStyle === "ranked" && (
+          <div className="form-group">
+            <label>Number of Picks</label>
+            <div className="rank-config">
+              <input
+                type="number"
+                min={1}
+                max={pollType === "date" ? Math.max(dates.length, 1) : Math.max(options.length, 2)}
+                value={rankCount}
+                onChange={(e) => setRankCount(Math.max(1, parseInt(e.target.value) || 1))}
+                className="rank-count-input"
+              />
+              <div className="rank-weight-toggle">
+                <button
+                  className={`style-btn${rankWeighted ? " style-active" : ""}`}
+                  onClick={() => setRankWeighted(true)}
+                  type="button"
+                >
+                  <span className="style-label">WEIGHTED</span>
+                  <span className="style-desc">1st worth more</span>
+                </button>
+                <button
+                  className={`style-btn${!rankWeighted ? " style-active" : ""}`}
+                  onClick={() => setRankWeighted(false)}
+                  type="button"
+                >
+                  <span className="style-label">EQUAL</span>
+                  <span className="style-desc">All picks same</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {pollType === "date" ? (
           <>

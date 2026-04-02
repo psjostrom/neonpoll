@@ -1098,3 +1098,65 @@ label {
     flex-direction: column;
   }
 }
+
+/* Rank config */
+.rank-config {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.rank-count-input {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--neon-cyan);
+  color: #fff;
+  padding: 12px 14px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 1rem;
+  width: 80px;
+  text-align: center;
+}
+
+.rank-count-input:focus {
+  box-shadow: var(--glow-cyan);
+  outline: none;
+}
+
+.rank-weight-toggle {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+
+.rank-weight-toggle .style-btn {
+  flex: 1;
+}
+
+/* Rank vote buttons */
+.rank-btn {
+  border-color: var(--neon-purple) !important;
+  color: var(--neon-purple) !important;
+}
+
+.rank-btn.active {
+  background: var(--neon-purple) !important;
+  color: #fff !important;
+  box-shadow: 0 0 14px rgba(155, 93, 229, 0.6) !important;
+}
+
+/* Rank cell in results table */
+.cell-rank {
+  color: var(--neon-purple) !important;
+  font-weight: bold;
+}
+
+@media (max-width: 600px) {
+  .rank-config {
+    flex-direction: column;
+  }
+
+  .rank-count-input {
+    width: 100%;
+  }
+}

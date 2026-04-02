@@ -99,6 +99,27 @@ export default function VotingPage() {
     });
   }
 
+  function toggleRank(key: string, rank: number) {
+    setVotes((prev) => {
+      const rankStr = String(rank);
+      const next = { ...prev };
+      // If this option already has this rank, deselect it
+      if (next[key] === rankStr) {
+        delete next[key];
+        return next;
+      }
+      // Remove this rank from any other option
+      for (const k of Object.keys(next)) {
+        if (next[k] === rankStr) {
+          delete next[k];
+        }
+      }
+      // Assign rank to this option
+      next[key] = rankStr;
+      return next;
+    });
+  }
+
   if (loading) {
     return (
       <div className="container" style={{ paddingTop: "40vh" }}>
@@ -183,6 +204,22 @@ export default function VotingPage() {
         >
           {votes[key] === "yes" ? "SELECTED" : "SELECT"}
         </button>
+      );
+    }
+    if (config!.votingStyle === "ranked") {
+      const rankCount = config!.rankCount ?? 3;
+      return (
+        <div className="vote-group">
+          {Array.from({ length: rankCount }, (_, i) => i + 1).map((rank) => (
+            <button
+              key={rank}
+              className={`vote-btn rank-btn${votes[key] === String(rank) ? " active" : ""}`}
+              onClick={() => toggleRank(key, rank)}
+            >
+              {rank === 1 ? "1ST" : rank === 2 ? "2ND" : rank === 3 ? "3RD" : `${rank}TH`}
+            </button>
+          ))}
+        </div>
       );
     }
     // multi-select
