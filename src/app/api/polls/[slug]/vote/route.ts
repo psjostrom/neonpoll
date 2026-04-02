@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getConfig, getVote, setVote } from "@/lib/kv";
+import { getValidKeys } from "@/lib/types";
 import type { Vote, VoteValue } from "@/lib/types";
 
 const VALID_VALUES: VoteValue[] = ["yes", "maybe", "no"];
@@ -55,11 +56,32 @@ export async function POST(
     return NextResponse.json({ error: "Poll not found" }, { status: 404 });
   }
 
-  const configDates = new Set(config.dates);
+  const validKeys = getValidKeys(config);
   const filteredVotes: Record<string, VoteValue> = {};
-  for (const [date, value] of Object.entries(votes)) {
-    if (configDates.has(date) && VALID_VALUES.includes(value as VoteValue)) {
-      filteredVotes[date] = value as VoteValue;
+
+  if (config.votingStyle === "yes-maybe-no") {
+    // Accept yes/maybe/no values
+    for (const [key, value] of Object.entries(votes)) {
+      if (validKeys.has(key) && VALID_VALUES.includes(value as VoteValue)) {
+        filteredVotes[key] = value as VoteValue;
+      }
+    }
+  } else if (config.votingStyle === "single-choice") {
+    // Only allow one key with value "yes"
+    const yesKeys = Object.entries(votes).filter(([key, value]) => validKeys.has(key) && value === "yes");
+    if (yesKeys.length !== 1) {
+      return NextResponse.json({ error: "single-choice requires exactly one 'yes' vote" }, { status: 400 });
+    }
+    filteredVotes[yesKeys[0][0]] = "yes";
+  } else {
+    // multi-select: only allow "yes" values
+    for (const [key, value] of Object.entries(votes)) {
+      if (validKeys.has(key)) {
+        if (value !== "yes") {
+          return NextResponse.json({ error: "multi-select only accepts 'yes' votes" }, { status: 400 });
+        }
+        filteredVotes[key] = "yes";
+      }
     }
   }
 
@@ -69,5 +91,5 @@ export async function POST(
   };
 
   await setVote(slug, vote);
-  return NextResponse.json(vote);
+  return NextResponse.json({ ok: true });
 }
