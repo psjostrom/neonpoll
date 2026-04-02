@@ -1,9 +1,20 @@
+export type PollType = "date" | "option";
+export type VotingStyle = "yes-maybe-no" | "single-choice" | "multi-select";
 export type VoteValue = "yes" | "maybe" | "no";
 
+export interface PollOption {
+  id: string;
+  title: string;
+  description?: string;
+}
+
 export interface PollConfig {
+  type: PollType;
+  votingStyle: VotingStyle;
   title: string;
   description: string;
   dates: string[];
+  options: PollOption[];
   adminToken: string;
   createdAt: string;
 }
@@ -17,7 +28,9 @@ export interface PollSummary {
   slug: string;
   title: string;
   description: string;
-  dateCount: number;
+  type: PollType;
+  votingStyle: VotingStyle;
+  itemCount: number;
   voteCount: number;
   createdAt: string;
 }
@@ -43,4 +56,13 @@ export function formatDate(iso: string): string {
     day: "numeric",
     weekday: "short",
   });
+}
+
+export function getValidKeys(config: PollConfig): Set<string> {
+  if (config.type === "date") return new Set(config.dates);
+  return new Set(config.options.map((o) => o.id));
+}
+
+export function generateOptionId(): string {
+  return Math.random().toString(36).slice(2, 10);
 }
