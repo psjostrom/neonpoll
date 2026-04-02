@@ -32,12 +32,35 @@ export function computeSummary(
     return { ranked };
   }
 
-  // single-choice and multi-select: count "yes" votes per item
+  if (config.votingStyle === "single-choice" || config.votingStyle === "multi-select") {
+    const ranked = items
+      .map((item) => {
+        const voteCount = votes.filter((v) => v.votes[item.id] === "yes").length;
+        return { ...item, voteCount };
+      })
+      .sort((a, b) => b.voteCount - a.voteCount);
+    return { ranked };
+  }
+
+  // ranked voting
+  const rankCount = config.rankCount ?? 3;
+  const weighted = config.rankWeighted ?? true;
   const ranked = items
     .map((item) => {
-      const voteCount = votes.filter((v) => v.votes[item.id] === "yes").length;
-      return { ...item, voteCount };
+      let score = 0;
+      let voteCount = 0;
+      for (const v of votes) {
+        const rank = v.votes[item.id];
+        if (rank) {
+          const rankNum = parseInt(rank, 10);
+          if (rankNum >= 1 && rankNum <= rankCount) {
+            voteCount++;
+            score += weighted ? (rankCount - rankNum + 1) : 1;
+          }
+        }
+      }
+      return { ...item, voteCount, score };
     })
-    .sort((a, b) => b.voteCount - a.voteCount);
+    .sort((a, b) => b.score! - a.score! || b.voteCount - a.voteCount);
   return { ranked };
 }

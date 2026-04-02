@@ -3,7 +3,7 @@ import { getConfig, getVote, setVote } from "@/lib/kv";
 import { getValidKeys } from "@/lib/types";
 import type { Vote, VoteValue } from "@/lib/types";
 
-const VALID_VALUES: VoteValue[] = ["yes", "maybe", "no"];
+const VALID_VALUES = ["yes", "maybe", "no"];
 
 export async function GET(
   request: NextRequest,
@@ -73,7 +73,7 @@ export async function POST(
       return NextResponse.json({ error: "single-choice requires exactly one 'yes' vote" }, { status: 400 });
     }
     filteredVotes[yesKeys[0][0]] = "yes";
-  } else {
+  } else if (config.votingStyle === "multi-select") {
     // multi-select: only allow "yes" values
     for (const [key, value] of Object.entries(votes)) {
       if (validKeys.has(key)) {
@@ -82,6 +82,19 @@ export async function POST(
         }
         filteredVotes[key] = "yes";
       }
+    }
+  } else {
+    // ranked: values are rank numbers as strings ("1", "2", "3"...)
+    const rankCount = config.rankCount ?? 3;
+    const usedRanks = new Set<string>();
+    for (const [key, value] of Object.entries(votes)) {
+      if (!validKeys.has(key)) continue;
+      const rankNum = parseInt(value, 10);
+      if (isNaN(rankNum) || rankNum < 1 || rankNum > rankCount) continue;
+      const rankStr = String(rankNum);
+      if (usedRanks.has(rankStr)) continue; // each rank used at most once
+      usedRanks.add(rankStr);
+      filteredVotes[key] = rankStr as VoteValue;
     }
   }
 

@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { slug, title, description, type, votingStyle, dates, options } = body as {
+  const { slug, title, description, type, votingStyle, dates, options, rankCount, rankWeighted } = body as {
     slug?: string;
     title?: string;
     description?: string;
@@ -20,6 +20,8 @@ export async function POST(request: NextRequest) {
     votingStyle?: string;
     dates?: string[];
     options?: unknown[];
+    rankCount?: number;
+    rankWeighted?: boolean;
   };
 
   if (!slug || typeof slug !== "string" || !isValidSlug(slug)) {
@@ -41,8 +43,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "type must be 'date' or 'option'" }, { status: 400 });
   }
 
-  if (votingStyle !== "yes-maybe-no" && votingStyle !== "single-choice" && votingStyle !== "multi-select") {
-    return NextResponse.json({ error: "votingStyle must be 'yes-maybe-no', 'single-choice', or 'multi-select'" }, { status: 400 });
+  if (votingStyle !== "yes-maybe-no" && votingStyle !== "single-choice" && votingStyle !== "multi-select" && votingStyle !== "ranked") {
+    return NextResponse.json({ error: "votingStyle must be 'yes-maybe-no', 'single-choice', 'multi-select', or 'ranked'" }, { status: 400 });
+  }
+
+  if (votingStyle === "ranked") {
+    if (rankCount === undefined || typeof rankCount !== "number" || rankCount < 1 || rankCount > 30 || !Number.isInteger(rankCount)) {
+      return NextResponse.json({ error: "rankCount required for ranked polls, integer 1-30" }, { status: 400 });
+    }
+    if (typeof rankWeighted !== "boolean") {
+      return NextResponse.json({ error: "rankWeighted required for ranked polls (boolean)" }, { status: 400 });
+    }
   }
 
   let validatedDates: string[] = [];
@@ -97,6 +108,7 @@ export async function POST(request: NextRequest) {
     description: (description || "").trim(),
     dates: validatedDates,
     options: validatedOptions,
+    ...(votingStyle === "ranked" ? { rankCount, rankWeighted } : {}),
     adminToken,
     createdAt: new Date().toISOString(),
   };

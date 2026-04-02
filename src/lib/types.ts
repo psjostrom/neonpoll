@@ -1,6 +1,6 @@
 export type PollType = "date" | "option";
-export type VotingStyle = "yes-maybe-no" | "single-choice" | "multi-select";
-export type VoteValue = "yes" | "maybe" | "no";
+export type VotingStyle = "yes-maybe-no" | "single-choice" | "multi-select" | "ranked";
+export type VoteValue = string;
 
 export interface PollOption {
   id: string;
@@ -15,6 +15,8 @@ export interface PollConfig {
   description: string;
   dates: string[];
   options: PollOption[];
+  rankCount?: number;
+  rankWeighted?: boolean;
   adminToken: string;
   createdAt: string;
 }

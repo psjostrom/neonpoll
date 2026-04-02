@@ -47,6 +47,8 @@ export async function PUT(
     votingStyle?: string;
     dates?: string[];
     options?: unknown[];
+    rankCount?: number;
+    rankWeighted?: boolean;
   };
 
   if (!update.title || typeof update.title !== "string" || update.title.length > 100) {
@@ -58,8 +60,8 @@ export async function PUT(
   }
 
   const votingStyle = (update.votingStyle || existing.votingStyle) as VotingStyle;
-  if (votingStyle !== "yes-maybe-no" && votingStyle !== "single-choice" && votingStyle !== "multi-select") {
-    return NextResponse.json({ error: "votingStyle must be 'yes-maybe-no', 'single-choice', or 'multi-select'" }, { status: 400 });
+  if (votingStyle !== "yes-maybe-no" && votingStyle !== "single-choice" && votingStyle !== "multi-select" && votingStyle !== "ranked") {
+    return NextResponse.json({ error: "votingStyle must be 'yes-maybe-no', 'single-choice', 'multi-select', or 'ranked'" }, { status: 400 });
   }
 
   let validated: PollConfig;
@@ -81,6 +83,10 @@ export async function PUT(
       description: (update.description || "").trim(),
       dates: [...update.dates].sort(),
       options: [],
+      ...(votingStyle === "ranked" ? {
+        rankCount: update.rankCount ?? existing.rankCount ?? 3,
+        rankWeighted: update.rankWeighted ?? existing.rankWeighted ?? true
+      } : {}),
       adminToken: existing.adminToken,
       createdAt: existing.createdAt,
     };
@@ -117,6 +123,10 @@ export async function PUT(
       description: (update.description || "").trim(),
       dates: [],
       options: validatedOptions,
+      ...(votingStyle === "ranked" ? {
+        rankCount: update.rankCount ?? existing.rankCount ?? 3,
+        rankWeighted: update.rankWeighted ?? existing.rankWeighted ?? true
+      } : {}),
       adminToken: existing.adminToken,
       createdAt: existing.createdAt,
     };
