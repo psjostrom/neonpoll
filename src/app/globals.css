@@ -701,3 +701,14 @@ label {
     align-items: stretch;
   }
 }
+
+/* Landing page */
+.landing-cta {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.landing-cta a {
+  text-decoration: none;
+  display: inline-block;
+}
