@@ -3,8 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import type { PollSummary } from "@/lib/types";
+import type { PollSummary, PollType, VotingStyle, PollOption } from "@/lib/types";
 import { CalendarPicker } from "@/app/components/CalendarPicker";
+import { PollTypeSelector } from "@/app/components/PollTypeSelector";
+import { VotingStyleSelector } from "@/app/components/VotingStyleSelector";
+import { OptionEditor } from "@/app/components/OptionEditor";
 import { formatDate } from "@/lib/types";
 
 export function GlobalAdmin({ token }: { token: string }) {
@@ -14,10 +17,13 @@ export function GlobalAdmin({ token }: { token: string }) {
 
   // Create form state
   const [showCreate, setShowCreate] = useState(false);
+  const [pollType, setPollType] = useState<PollType>("date");
+  const [votingStyle, setVotingStyle] = useState<VotingStyle>("yes-maybe-no");
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [dates, setDates] = useState<string[]>([]);
+  const [options, setOptions] = useState<PollOption[]>([]);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
 
@@ -43,14 +49,37 @@ export function GlobalAdmin({ token }: { token: string }) {
     setSlug(value.toLowerCase().replace(/[^a-z0-9-]/g, "").replace(/--+/g, "-"));
   }
 
+  const canCreate =
+    title.trim() &&
+    slug.length >= 3 &&
+    (pollType === "date" ? dates.length > 0 : options.length >= 2);
+
   async function handleCreate() {
     setCreateError("");
     setCreating(true);
     try {
+      const body: Record<string, unknown> = {
+        type: pollType,
+        votingStyle,
+        slug,
+        title,
+        description,
+      };
+      if (pollType === "date") {
+        body.dates = dates;
+        body.options = [];
+      } else {
+        body.options = options.map((o) => ({
+          title: o.title,
+          ...(o.description ? { description: o.description } : {}),
+        }));
+        body.dates = [];
+      }
+
       const res = await fetch("/api/polls", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug, title, description, dates }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -59,7 +88,7 @@ export function GlobalAdmin({ token }: { token: string }) {
         return;
       }
       const data = await res.json();
-      router.push(`/p/${data.slug}/admin?token=${encodeURIComponent(data.adminToken)}`);
+      router.push(data.adminUrl);
     } catch {
       setCreateError("Network error. Try again.");
       setCreating(false);
@@ -79,6 +108,10 @@ export function GlobalAdmin({ token }: { token: string }) {
     } catch {
       // delete failed
     }
+  }
+
+  function typeBadge(type: PollType) {
+    return type === "date" ? "DATE" : "OPTION";
   }
 
   return (
@@ -102,10 +135,11 @@ export function GlobalAdmin({ token }: { token: string }) {
                     href={`/p/${poll.slug}/admin?token=${encodeURIComponent(token)}`}
                     className="poll-list-title"
                   >
+                    <span className="poll-type-tag">{typeBadge(poll.type)}</span>
                     {poll.title}
                   </Link>
                   <span className="poll-list-meta">
-                    /p/{poll.slug} — {poll.dateCount} dates — {poll.voteCount} votes
+                    /p/{poll.slug} — {poll.itemCount} {poll.type === "date" ? "dates" : "options"} — {poll.voteCount} votes
                   </span>
                 </div>
                 <button
@@ -130,6 +164,11 @@ export function GlobalAdmin({ token }: { token: string }) {
             <h2>CREATE NEW POLL</h2>
 
             <div className="form-group">
+              <label>Poll Type</label>
+              <PollTypeSelector value={pollType} onChange={setPollType} />
+            </div>
+
+            <div className="form-group">
               <label>Event Title</label>
               <input
                 type="text"
@@ -143,14 +182,12 @@ export function GlobalAdmin({ token }: { token: string }) {
               <label>Slug</label>
               <input
                 type="text"
-                placeholder="friday-dinner"
+                placeholder={pollType === "date" ? "friday-dinner" : "team-activity"}
                 value={slug}
                 onChange={(e) => handleSlugChange(e.target.value)}
                 maxLength={50}
               />
-              {slug && (
-                <span className="slug-preview">/p/{slug}</span>
-              )}
+              {slug && <span className="slug-preview">/p/{slug}</span>}
             </div>
 
             <div className="form-group">
@@ -164,18 +201,31 @@ export function GlobalAdmin({ token }: { token: string }) {
             </div>
 
             <div className="form-group">
-              <label>Select Dates</label>
-              <CalendarPicker selected={dates} onChange={setDates} />
+              <label>Voting Style</label>
+              <VotingStyleSelector value={votingStyle} onChange={setVotingStyle} />
             </div>
 
-            {dates.length > 0 && (
-              <div className="date-chips">
-                {dates.map((date) => (
-                  <span key={date} className="date-chip">
-                    {formatDate(date)}
-                    <button onClick={() => setDates(dates.filter((d) => d !== date))}>&times;</button>
-                  </span>
-                ))}
+            {pollType === "date" ? (
+              <>
+                <div className="form-group">
+                  <label>Select Dates</label>
+                  <CalendarPicker selected={dates} onChange={setDates} />
+                </div>
+                {dates.length > 0 && (
+                  <div className="date-chips">
+                    {dates.map((date) => (
+                      <span key={date} className="date-chip">
+                        {formatDate(date)}
+                        <button onClick={() => setDates(dates.filter((d) => d !== date))}>&times;</button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="form-group">
+                <label>Options ({options.length}/30)</label>
+                <OptionEditor options={options} onChange={setOptions} />
               </div>
             )}
 
@@ -183,7 +233,7 @@ export function GlobalAdmin({ token }: { token: string }) {
               <button
                 className="btn-primary"
                 onClick={handleCreate}
-                disabled={creating || !title.trim() || slug.length < 3 || dates.length === 0}
+                disabled={creating || !canCreate}
               >
                 {creating ? "CREATING..." : "CREATE"}
               </button>
