@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
   }
 
   let validatedDates: string[] = [];
-  let validatedOptions: PollOption[] = [];
+  const validatedOptions: PollOption[] = [];
 
   if (type === "date") {
     if (!Array.isArray(dates) || dates.length === 0 || dates.length > 30) {
