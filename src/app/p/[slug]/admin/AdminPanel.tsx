@@ -1,0 +1,349 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { formatDate, getIsoWeek } from "@/lib/types";
+import type { Vote, VoteValue } from "@/lib/types";
+import { CalendarPicker } from "@/app/components/CalendarPicker";
+
+export function AdminPanel({ slug, token }: { slug: string; token: string }) {
+  const router = useRouter();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [dates, setDates] = useState<string[]>([]);
+  const [votes, setVotes] = useState<Vote[]>([]);
+  const [configStatus, setConfigStatus] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const pollUrl = typeof window !== "undefined"
+    ? `${window.location.origin}/p/${slug}`
+    : `/p/${slug}`;
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const [configRes, votesRes] = await Promise.all([
+          fetch(`/api/polls/${encodeURIComponent(slug)}/config`),
+          fetch(`/api/polls/${encodeURIComponent(slug)}/votes?token=${encodeURIComponent(token)}`),
+        ]);
+
+        if (configRes.ok) {
+          const data = await configRes.json();
+          setTitle(data.title || "");
+          setDescription(data.description || "");
+          setDates(data.dates || []);
+        }
+
+        if (votesRes.ok) {
+          const data = await votesRes.json();
+          setVotes(data.votes || []);
+        }
+      } catch {
+        // initial load failed
+      }
+    }
+    load();
+  }, [slug, token]);
+
+  async function refreshVotes() {
+    try {
+      const res = await fetch(
+        `/api/polls/${encodeURIComponent(slug)}/votes?token=${encodeURIComponent(token)}`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setVotes(data.votes || []);
+      }
+    } catch {
+      // fetch failed
+    }
+  }
+
+  async function saveConfig() {
+    setConfigStatus("saving");
+    setErrorMsg("");
+    try {
+      const res = await fetch(
+        `/api/polls/${encodeURIComponent(slug)}/config?token=${encodeURIComponent(token)}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, description, dates }),
+        }
+      );
+      if (res.ok) {
+        setConfigStatus("saved");
+        setTimeout(() => setConfigStatus("idle"), 2000);
+      } else {
+        const data = await res.json().catch(() => null);
+        setErrorMsg(data?.error || `${res.status} ${res.statusText}`);
+        setConfigStatus("error");
+      }
+    } catch (e) {
+      setErrorMsg(e instanceof Error ? e.message : "Network error");
+      setConfigStatus("error");
+    }
+  }
+
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      const res = await fetch(
+        `/api/polls/${encodeURIComponent(slug)}?token=${encodeURIComponent(token)}`,
+        { method: "DELETE" }
+      );
+      if (res.ok) {
+        router.push("/");
+      }
+    } catch {
+      // delete failed
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  function cellIcon(value: VoteValue | undefined) {
+    if (value === "yes") return { text: "\u2713", cls: "cell-yes" };
+    if (value === "maybe") return { text: "?", cls: "cell-maybe" };
+    if (value === "no") return { text: "\u2717", cls: "cell-no" };
+    return { text: "\u2013", cls: "cell-none" };
+  }
+
+  const weekGroups = dates.reduce<Record<number, string[]>>((groups, date) => {
+    const week = getIsoWeek(date);
+    (groups[week] ??= []).push(date);
+    return groups;
+  }, {});
+
+  return (
+    <div className="container">
+      <div className="sun" />
+      <h1 className="title">NEONPOLL</h1>
+      <p className="subtitle">ADMIN — {title || slug}</p>
+
+      <div className="admin-section">
+        <h2>SHARE LINK</h2>
+        <div className="share-link">
+          <code>{pollUrl}</code>
+          <button
+            className="btn-primary btn-small"
+            onClick={() => navigator.clipboard.writeText(pollUrl)}
+          >
+            COPY
+          </button>
+        </div>
+      </div>
+
+      <div className="admin-section">
+        <h2>CONFIGURATION</h2>
+
+        <div className="form-group">
+          <label>Event Title</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            maxLength={100}
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Description</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            maxLength={500}
+            rows={2}
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Select Dates</label>
+          <CalendarPicker selected={dates} onChange={setDates} />
+        </div>
+
+        {dates.length > 0 && (
+          <div className="date-chips">
+            {dates.map((date) => (
+              <span key={date} className="date-chip">
+                {formatDate(date)}
+                <button onClick={() => setDates(dates.filter((d) => d !== date))}>&times;</button>
+              </span>
+            ))}
+          </div>
+        )}
+
+        <div style={{ marginTop: 16 }}>
+          <button
+            className="btn-primary"
+            onClick={saveConfig}
+            disabled={configStatus === "saving"}
+          >
+            {configStatus === "saving" ? "SAVING..." : "SAVE CONFIG"}
+          </button>
+          {configStatus === "saved" && (
+            <span className="success" style={{ marginLeft: 12 }}>
+              SAVED
+            </span>
+          )}
+          {configStatus === "error" && (
+            <span className="error" style={{ marginLeft: 12 }}>
+              {errorMsg || "SAVE FAILED"}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="admin-section">
+        <h2>RESULTS</h2>
+
+        <div className="refresh-row">
+          <span className="response-count">
+            {votes.length} {votes.length === 1 ? "RESPONSE" : "RESPONSES"}
+          </span>
+          <button className="btn-primary btn-small" onClick={refreshVotes}>
+            REFRESH
+          </button>
+        </div>
+
+        {votes.length > 0 && dates.length > 0 && (() => {
+          const ranked = dates
+            .map((date) => ({
+              date,
+              yes: votes.filter((v) => v.votes[date] === "yes").length,
+              maybe: votes.filter((v) => v.votes[date] === "maybe").length,
+            }))
+            .sort((a, b) => (b.yes + b.maybe * 0.5) - (a.yes + a.maybe * 0.5) || b.yes - a.yes);
+          const total = votes.length;
+          const topScore = ranked[0].yes;
+          return (
+            <div className="scoreboard">
+              {ranked.map((entry, i) => {
+                const score = entry.yes + entry.maybe * 0.5;
+                const maxScore = total;
+                const barPct = maxScore > 0 ? (score / maxScore) * 100 : 0;
+                const yesPct = maxScore > 0 ? (entry.yes / maxScore) * 100 : 0;
+                return (
+                  <div
+                    key={entry.date}
+                    className={`scoreboard-row${entry.yes === topScore && topScore > 0 ? " scoreboard-top" : ""}`}
+                  >
+                    <span className="scoreboard-rank">{i + 1}</span>
+                    <span className="scoreboard-date">{formatDate(entry.date)}</span>
+                    <span className="scoreboard-bar-track">
+                      <span className="scoreboard-bar-yes" style={{ width: `${yesPct}%` }} />
+                      {barPct > yesPct && (
+                        <span className="scoreboard-bar-meh" style={{ width: `${barPct - yesPct}%` }} />
+                      )}
+                    </span>
+                    <span className="scoreboard-count">
+                      {entry.yes} YES
+                      {entry.maybe > 0 && <span className="scoreboard-maybe"> / {entry.maybe} MEH</span>}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
+
+        {votes.length === 0 ? (
+          <p style={{ color: "#9090a0", letterSpacing: 2 }}>
+            No responses yet
+          </p>
+        ) : (
+          Object.entries(weekGroups).map(([week, weekDates]) => {
+            const yesCounts = weekDates.map(
+              (date) => votes.filter((v) => v.votes[date] === "yes").length
+            );
+            const maxYes = Math.max(...yesCounts, 0);
+            return (
+              <div key={week} style={{ marginBottom: 20 }}>
+                <div className="week-label">W{week}</div>
+                <div className="results-table-wrap">
+                  <table className="results-table">
+                    <thead>
+                      <tr>
+                        <th style={{ textAlign: "left" }}>NAME</th>
+                        {weekDates.map((date) => (
+                          <th key={date}>{formatDate(date)}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {votes.map((vote) => (
+                        <tr key={vote.name}>
+                          <td>{vote.name}</td>
+                          {weekDates.map((date) => {
+                            const { text, cls } = cellIcon(vote.votes[date]);
+                            return (
+                              <td key={date} className={cls}>
+                                {text}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                      <tr className="summary-row">
+                        <td>TOTAL</td>
+                        {weekDates.map((date, i) => (
+                          <td
+                            key={date}
+                            className={
+                              maxYes > 0 && yesCounts[i] === maxYes
+                                ? "best-date"
+                                : ""
+                            }
+                          >
+                            {yesCounts[i]}
+                          </td>
+                        ))}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      <div className="admin-section">
+        <h2>DANGER ZONE</h2>
+        <p style={{ color: "#9090a0", letterSpacing: 1, marginBottom: 12, fontSize: 14 }}>
+          Delete this poll and all its votes permanently.
+        </p>
+        {!deleteConfirm ? (
+          <button
+            className="btn-primary btn-danger"
+            onClick={() => setDeleteConfirm(true)}
+            disabled={deleting}
+          >
+            DELETE POLL
+          </button>
+        ) : (
+          <div className="wipe-confirm">
+            <span style={{ color: "#ff4466", letterSpacing: 1 }}>ARE YOU SURE?</span>
+            <button
+              className="btn-primary btn-danger"
+              disabled={deleting}
+              onClick={handleDelete}
+            >
+              {deleting ? "DELETING..." : "YES, DELETE"}
+            </button>
+            <button
+              className="btn-primary btn-small"
+              onClick={() => setDeleteConfirm(false)}
+            >
+              CANCEL
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

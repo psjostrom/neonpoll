@@ -727,3 +727,24 @@ label {
   letter-spacing: 1px;
   margin-left: 8px;
 }
+
+/* Share link */
+.share-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.share-link code {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--neon-cyan);
+  padding: 10px 14px;
+  border-radius: 4px;
+  color: var(--neon-cyan);
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  word-break: break-all;
+  flex: 1;
+  min-width: 0;
+}
