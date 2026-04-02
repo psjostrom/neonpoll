@@ -4,11 +4,28 @@ export interface PollConfig {
   title: string;
   description: string;
   dates: string[];
+  adminToken: string;
+  createdAt: string;
 }
 
 export interface Vote {
   name: string;
   votes: Record<string, VoteValue>;
+}
+
+export interface PollSummary {
+  slug: string;
+  title: string;
+  description: string;
+  dateCount: number;
+  voteCount: number;
+  createdAt: string;
+}
+
+const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/;
+
+export function isValidSlug(slug: string): boolean {
+  return SLUG_REGEX.test(slug);
 }
 
 export function getIsoWeek(iso: string): number {
