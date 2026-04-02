@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
-import { AdminPanel } from "./AdminPanel";
+import { GlobalAdmin } from "./GlobalAdmin";
 
-export default async function AdminPage({
+export default async function GlobalAdminPage({
   searchParams,
 }: {
   searchParams: Promise<{ token?: string }>;
@@ -13,5 +13,5 @@ export default async function AdminPage({
     notFound();
   }
 
-  return <AdminPanel token={token} />;
+  return <GlobalAdmin token={token} />;
 }

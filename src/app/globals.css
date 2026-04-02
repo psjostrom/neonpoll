@@ -748,3 +748,45 @@ label {
   flex: 1;
   min-width: 0;
 }
+
+/* Poll list (global admin) */
+.poll-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.poll-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(155, 93, 229, 0.3);
+  border-radius: 6px;
+}
+
+.poll-list-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.poll-list-title {
+  color: var(--neon-cyan);
+  text-decoration: none;
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+}
+
+.poll-list-title:hover {
+  text-shadow: 0 0 8px rgba(92, 255, 250, 0.5);
+}
+
+.poll-list-meta {
+  color: #9090a0;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+}
